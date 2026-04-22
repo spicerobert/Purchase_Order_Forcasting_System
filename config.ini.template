@@ -1,0 +1,68 @@
+[ERP_DATABASE]
+# MS-SQL Server 資料庫連接設定
+# 使用 SQL Server 帳號密碼時，填寫 username 與 password
+# 使用 Windows 整合驗證時，留空 username 與 password（將自動使用 Trusted_Connection）
+server = YOUR_SERVER_IP
+database = YOUR_DATABASE_NAME
+username = YOUR_USERNAME
+password = YOUR_PASSWORD
+
+[INVENTORY]
+# 欲查詢的倉庫代碼，逗號分隔
+warehouse_codes = SB11,SB12,SB13,SB14,SM10,SM20,SM30,SP10,SP11,SP20,SP30,SP40,SP50,SP60,SP61,SP70,SP80,SP81,SS10,SS11,SS12,SS13,SS14,SS20,SS30,SS40,SS41,SS42
+
+[ERP_QUERIES]
+# 可選：覆寫預設 SQL 查詢（通常留空，使用程式內建 SQL）
+# inventory_query = YOUR_SQL
+# wip_inventory_query = YOUR_SQL
+
+[GOOGLE_SHEETS]
+# Google Sheets 試算表 URL
+spreadsheet_url  = YOUR_SPREADSHEET_URL
+# 服務帳戶憑證 JSON 檔案路徑（不納入版控，請自行放置）
+credentials_file = service_account.json
+# 輸入工作表名稱（品號參數由使用者填寫；可選欄「進貨模式」：常備／有單才進）
+input_sheet      = 品號參數
+# 輸出工作表名稱（進貨建議由系統寫入）
+output_sheet     = 進貨建議
+# 需求分群結果（run_demand_profile.py 寫入）
+profile_sheet    = 需求分群
+
+[SEASON_ANCHORS]
+# 日曆旺季：多組以分號分隔；組內「中秋節日期|該循環結束之春節正月初一」（春節當日＝旺季最後一日，不另加偏移）
+# 旺季區間 = [中秋當日 − days_before_mid_autumn, 春節當日]（預設中秋前推 90 天起算旺季）
+# 參考：2027/2/6 春節、2027/9/15 中秋（下一組 2027-09-15|待補 2028 春節）
+days_before_mid_autumn = 90
+peak_cycle_pairs = 2025-10-06|2026-02-17;2026-09-25|2027-02-06
+
+[DEMAND_PROFILE]
+# 淡旺季比 ≥ 此值視為具季節性（配合移動平均是否在日曆旺季內判斷 B / C）
+ratio_seasonal_min = 1.5
+# CV ≤ 此值且淡旺比接近 1 → A 穩定全年
+cv_stable_max = 0.5
+# 零出庫週占比 ≥ 此值 → D 間歇／低頻
+zero_week_intermittent_min = 0.35
+# 週均 ≤ 此值且零出庫占比偏高時傾向 D
+mean_intermittent_max = 3.0
+# 8 週趨勢係數 adj = 近4週均(不含最新週) / 前4週均，用於乘上分群後之週需求 D（進貨建議）
+trend_adj_enabled = true
+trend_adj_min = 0.5
+trend_adj_max = 1.5
+# 前4週均 ≤ 此值時不計比率，adj 視為 1（避免分母過小爆量）
+trend_adj_prev4_floor = 0.01
+
+[SAFETY_STOCK]
+# 目標服務水平（%），對應 Z 係數：99%→2.33 / 95%→1.65 / 90%→1.28 / 85%→1.04
+service_level       = 95
+# 平均採購提前期 L（週）
+avg_lead_time_weeks = 2
+# 提前期標準差 STD2（週），交期固定填 0，退化為情境一
+std_lead_time_weeks = 0.5
+# 訂貨周期 T（兩次採購間的間隔週數）
+order_cycle_weeks   = 2
+# 需求歷史回溯週數（至少 52 週）
+history_weeks       = 52
+# 「進貨建議」欄是否顯示「庫存偏高」：現有庫存 >= (L+T)*D + SS + 下方額外週數*採用週需求_D
+overstock_suggestion_enabled = true
+# 額外週數（乘以採用週需求_D）；設為 0 則永不標示庫存偏高
+overstock_extra_demand_weeks = 6

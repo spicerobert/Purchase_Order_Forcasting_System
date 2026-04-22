@@ -201,6 +201,18 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# 資料庫連線設定（含憑證，不納入版控）
+config.ini
+
+# Google Service Account 憑證（含私鑰，不納入版控）
+service_account.json
+
+# 需求分群匯出（可由 run_demand_profile.py 重產）
+demand_profile_export.csv
+
+# Windows 保留名稱；誤用重新導向時可能產生此檔，勿納入版控
+nul
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
